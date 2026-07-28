@@ -229,7 +229,7 @@ router.get('/media/photos', adminAuthMiddleware(), async (req, res, next) => {
 
 router.put('/media/photos/:id', adminAuthMiddleware(), async (req, res, next) => {
   try {
-    const { id } = req.params;
+    const id = String(req.params.id);
     const adminEmail = (req as any).adminEmail;
     const body = req.body;
     
@@ -247,7 +247,17 @@ router.put('/media/photos/:id', adminAuthMiddleware(), async (req, res, next) =>
 
     const [updated] = await db.update(photos).set(updateData).where(eq(photos.id, id)).returning();
     
-    await logAdminAction(adminEmail, req, 'UPDATE_PHOTO', 'photo', id, prev[0], updated);
+    await logAdminAction({
+      adminEmail,
+      ipAddress: req.ip,
+      userAgent: req.headers['user-agent'],
+      action: 'UPDATE_PHOTO',
+      resourceType: 'photo',
+      resourceId: id,
+      previousValue: prev[0],
+      newValue: updated,
+      status: 'success'
+    });
     res.json(updated);
   } catch (error) {
     next(error);
@@ -256,7 +266,7 @@ router.put('/media/photos/:id', adminAuthMiddleware(), async (req, res, next) =>
 
 router.delete('/media/photos/:id', adminAuthMiddleware(), async (req, res, next) => {
   try {
-    const { id } = req.params;
+    const id = String(req.params.id);
     const adminEmail = (req as any).adminEmail;
 
     const prev = await db.select().from(photos).where(eq(photos.id, id));
@@ -264,7 +274,17 @@ router.delete('/media/photos/:id', adminAuthMiddleware(), async (req, res, next)
 
     const [updated] = await db.update(photos).set({ publishStatus: 'archived', updatedAt: new Date() }).where(eq(photos.id, id)).returning();
 
-    await logAdminAction(adminEmail, req, 'SOFT_DELETE_PHOTO', 'photo', id, prev[0], updated);
+    await logAdminAction({
+      adminEmail,
+      ipAddress: req.ip,
+      userAgent: req.headers['user-agent'],
+      action: 'SOFT_DELETE_PHOTO',
+      resourceType: 'photo',
+      resourceId: id,
+      previousValue: prev[0],
+      newValue: updated,
+      status: 'success'
+    });
     res.json({ success: true, message: 'Photo archived (soft deleted)' });
   } catch (error) {
     next(error);
@@ -286,7 +306,7 @@ router.get('/media/videos', adminAuthMiddleware(), async (req, res, next) => {
 
 router.put('/media/videos/:id', adminAuthMiddleware(), async (req, res, next) => {
   try {
-    const { id } = req.params;
+    const id = String(req.params.id);
     const adminEmail = (req as any).adminEmail;
     const body = req.body;
     
@@ -303,7 +323,17 @@ router.put('/media/videos/:id', adminAuthMiddleware(), async (req, res, next) =>
 
     const [updated] = await db.update(videos).set(updateData).where(eq(videos.id, id)).returning();
     
-    await logAdminAction(adminEmail, req, 'UPDATE_VIDEO', 'video', id, prev[0], updated);
+    await logAdminAction({
+      adminEmail,
+      ipAddress: req.ip,
+      userAgent: req.headers['user-agent'],
+      action: 'UPDATE_VIDEO',
+      resourceType: 'video',
+      resourceId: id,
+      previousValue: prev[0],
+      newValue: updated,
+      status: 'success'
+    });
     res.json(updated);
   } catch (error) {
     next(error);
@@ -312,7 +342,7 @@ router.put('/media/videos/:id', adminAuthMiddleware(), async (req, res, next) =>
 
 router.delete('/media/videos/:id', adminAuthMiddleware(), async (req, res, next) => {
   try {
-    const { id } = req.params;
+    const id = String(req.params.id);
     const adminEmail = (req as any).adminEmail;
 
     const prev = await db.select().from(videos).where(eq(videos.id, id));
@@ -320,7 +350,17 @@ router.delete('/media/videos/:id', adminAuthMiddleware(), async (req, res, next)
 
     const [updated] = await db.update(videos).set({ publishStatus: 'archived', updatedAt: new Date() }).where(eq(videos.id, id)).returning();
 
-    await logAdminAction(adminEmail, req, 'SOFT_DELETE_VIDEO', 'video', id, prev[0], updated);
+    await logAdminAction({
+      adminEmail,
+      ipAddress: req.ip,
+      userAgent: req.headers['user-agent'],
+      action: 'SOFT_DELETE_VIDEO',
+      resourceType: 'video',
+      resourceId: id,
+      previousValue: prev[0],
+      newValue: updated,
+      status: 'success'
+    });
     res.json({ success: true, message: 'Video archived (soft deleted)' });
   } catch (error) {
     next(error);

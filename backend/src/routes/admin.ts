@@ -8,7 +8,7 @@ import { Resend } from 'resend';
 import { adminAuthMiddleware } from '../middleware/rbac';
 
 const router = Router();
-const resend = new Resend(process.env.RESEND_API_KEY);
+const resend = new Resend(process.env.RESEND_API_KEY || 're_placeholder_missing_key');
 const JWT_SECRET = process.env.ADMIN_JWT_SECRET || 'fallback-secret-for-admin-session-please-change';
 const secretKey = new TextEncoder().encode(JWT_SECRET);
 

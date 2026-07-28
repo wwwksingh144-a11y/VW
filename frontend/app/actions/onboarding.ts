@@ -2,7 +2,7 @@
 
 import { auth } from '@/lib/auth/server'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://vwapi.onrender.com';
 
 export async function saveOnboardingProfile(formData: FormData) {
   // 1. Check if user is authenticated

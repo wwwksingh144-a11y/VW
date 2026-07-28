@@ -2,7 +2,7 @@
 
 import { cookies } from 'next/headers';
 
-const getBackendUrl = () => process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
+const getBackendUrl = () => process.env.NEXT_PUBLIC_BACKEND_URL || 'https://vwapi.onrender.com';
 
 export async function initiatePromotion(name: string, email: string, role: string) {
   try {

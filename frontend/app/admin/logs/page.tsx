@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 
 async function getLogs(token: string) {
   try {
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://vwapi.onrender.com';
     const res = await fetch(`${backendUrl}/api/admin/logs`, {
       headers: {
         'Authorization': `Bearer ${token}`

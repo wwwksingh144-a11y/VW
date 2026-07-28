@@ -44,7 +44,7 @@ interface PhotoRecord {
   isStarred?: boolean;
 }
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "";
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "https://vwapi.onrender.com";
 
 interface AdminPhotoManagerProps {
   isModal?: boolean;

@@ -12,7 +12,7 @@ export async function loginAdmin(password: string) {
 
     const email = sessionRes.data.user.email;
     
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://vwapi.onrender.com';
     const response = await fetch(`${backendUrl}/api/admin/auth`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

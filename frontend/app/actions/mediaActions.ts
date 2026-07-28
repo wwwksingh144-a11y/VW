@@ -3,7 +3,7 @@
 import { cookies } from 'next/headers';
 import { auth } from '@/lib/auth/server';
 
-const getBackendUrl = () => process.env.NEXT_PUBLIC_BACKEND_URL || 'http://localhost:8000';
+const getBackendUrl = () => process.env.NEXT_PUBLIC_BACKEND_URL || 'https://vwapi.onrender.com';
 
 export async function getAdminMedia(type: 'photos' | 'videos') {
   try {

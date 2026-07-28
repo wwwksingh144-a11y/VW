@@ -46,8 +46,8 @@ export async function PUT(
 
     await logAdminAction(
       "insight.update",
-      user.id ?? "unknown",
-      user.email ?? "unknown",
+      user.name || user.email || "unknown",
+      user.email || "unknown",
       { insightId }
     );
 
@@ -86,8 +86,8 @@ export async function DELETE(
 
     await logAdminAction(
       "insight.delete",
-      user.id ?? "unknown",
-      user.email ?? "unknown",
+      user.name || user.email || "unknown",
+      user.email || "unknown",
       { insightId }
     );
 

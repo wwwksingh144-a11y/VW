@@ -53,8 +53,8 @@ export async function POST(req: NextRequest) {
 
     await logAdminAction(
       "insight.create",
-      user.id ?? "unknown",
-      user.email ?? "unknown",
+      user.name || user.email || "unknown",
+      user.email || "unknown",
       { slug: data.slug, title: data.title }
     );
 

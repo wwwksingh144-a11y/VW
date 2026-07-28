@@ -51,7 +51,7 @@ export async function createProject(data: any) {
 
   logAdminAction(
     "project.create", 
-    user.id ?? "unknown", 
+    user.name || user.email || "unknown", 
     user.email ?? "unknown", 
     { slug: data.slug, title: data.title }
   );
@@ -81,7 +81,7 @@ export async function updateProject(id: number, data: any) {
 
   logAdminAction(
     "project.update", 
-    user.id ?? "unknown", 
+    user.name || user.email || "unknown", 
     user.email ?? "unknown", 
     { projectId: id }
   );
@@ -100,7 +100,7 @@ export async function deleteProject(id: number) {
 
   logAdminAction(
     "project.delete", 
-    user.id ?? "unknown", 
+    user.name || user.email || "unknown", 
     user.email ?? "unknown", 
     { projectId: id }
   );

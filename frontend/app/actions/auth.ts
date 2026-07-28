@@ -86,7 +86,7 @@ export async function verifySignupOtp(formData: FormData) {
     return { error: "Missing email or verification code." }
   }
 
-  const result = await auth.emailOtp.verifyEmail({ email, otp })
+  const result = await (auth as any).emailOtp.verifyEmail({ email, otp })
 
   if (result?.error) {
     return { error: result.error.message || "Invalid verification code. Please try again." }

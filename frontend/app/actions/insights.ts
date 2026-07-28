@@ -55,8 +55,8 @@ export async function createInsight(data: any) {
 
   logAdminAction(
     "insight.create", 
-    user.id ?? "unknown", 
-    user.email ?? "unknown", 
+    user.name || user.email, 
+    user.email || "unknown", 
     { slug: data.slug, title: data.title }
   );
 
@@ -89,8 +89,8 @@ export async function updateInsight(id: number, data: any) {
 
   logAdminAction(
     "insight.update", 
-    user.id ?? "unknown", 
-    user.email ?? "unknown", 
+    user.name || user.email, 
+    user.email || "unknown", 
     { insightId: id }
   );
 
@@ -108,8 +108,8 @@ export async function deleteInsight(id: number) {
 
   logAdminAction(
     "insight.delete", 
-    user.id ?? "unknown", 
-    user.email ?? "unknown", 
+    user.name || user.email, 
+    user.email || "unknown", 
     { insightId: id }
   );
 

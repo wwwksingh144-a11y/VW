@@ -33,6 +33,14 @@ interface VideoRecord {
   createdAt: string;
   processedAt: string | null;
   logs?: LogEntry[];
+  heading?: string | null;
+  subHeading?: string | null;
+  description?: string | null;
+  tags?: string[] | null;
+  category?: string | null;
+  publishStatus?: "published" | "draft" | "archived";
+  displayOrder?: number;
+  isStarred?: boolean;
 }
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "";

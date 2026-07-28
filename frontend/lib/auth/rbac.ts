@@ -52,8 +52,8 @@ export async function requireAdmin(requiredRoles?: string[]): Promise<AdminUser>
       redirect('/admin-login');
     }
 
-    // Check for mismatch
-    if (adminPayload.email !== userEmail && adminPayload.email !== process.env.SUPER_ADMIN_EMAIL) {
+    // Check for mismatch (Strict Enforcement)
+    if (adminPayload.email !== userEmail) {
       console.warn(`Mismatch in admin session and primary session for ${userEmail}`);
       redirect('/admin-login');
     }

@@ -40,6 +40,9 @@ app.use('/api/admin', adminRoutes);
 app.get('/health', publicRateLimitMiddleware, (req, res) => {
   res.json({ status: 'ok', time: new Date().toISOString() });
 });
+app.get('/', publicRateLimitMiddleware, (req, res) => {
+  res.json({ status: 'ok', time: new Date().toISOString() });
+});
 
 
 // Projects API

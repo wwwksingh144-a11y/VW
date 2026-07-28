@@ -92,10 +92,21 @@ export default async function RootLayout({
   children: React.ReactNode;
 }>) {
   let user = null;
+  let isAdmin = false;
   try {
     const sessionRes = await auth.getSession();
-    if (sessionRes.data?.user) {
+    if (sessionRes?.data?.user) {
       user = sessionRes.data.user;
+      
+      const adminEmails = process.env.ADMIN_EMAILS ? process.env.ADMIN_EMAILS.split(',').map(e => e.trim().toLowerCase()) : [];
+      const superAdmin = process.env.SUPER_ADMIN_EMAIL?.trim().toLowerCase();
+      
+      if (
+        (user.email && adminEmails.includes(user.email.toLowerCase())) || 
+        (user.email && superAdmin === user.email.toLowerCase())
+      ) {
+        isAdmin = true;
+      }
     }
   } catch (e) {
     // Ignore errors during build or if Neon Auth is unconfigured
@@ -116,7 +127,7 @@ export default async function RootLayout({
         <LoaderProvider>
           <SmoothScrollProvider>
             <CursorAperture />
-            <Navbar user={user} />
+            <Navbar user={user} isAdmin={isAdmin} />
             <main className="flex-grow">{children}</main>
             <Footer />
           </SmoothScrollProvider>

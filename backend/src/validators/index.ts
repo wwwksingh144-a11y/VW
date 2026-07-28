@@ -18,8 +18,14 @@ export const InsightSchema = z.object({
 // Strict schema for User Profile creation/update
 export const UserProfileSchema = z.object({
   userId: z.string().min(1).max(255),
-  displayName: z.string().min(1).max(255).optional(),
-  bio: z.string().optional(),
+  type: z.enum(['individual', 'company']),
+  name: z.string().min(1).max(255),
+  phone: z.string().optional().nullable(),
+  address: z.any().optional().nullable(),
+  companyName: z.string().optional().nullable(),
+  employeesCount: z.string().optional().nullable(),
+  interests: z.array(z.string()).optional().nullable(),
+  source: z.string().optional().nullable(),
 }).strict();
 
 

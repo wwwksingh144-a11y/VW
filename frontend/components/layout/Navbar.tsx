@@ -11,7 +11,7 @@ import { UserCircle, LogOut } from "lucide-react";
 import { logoutUser } from "@/app/actions/auth";
 import { useTransition } from "react";
 
-export default function Navbar({ user }: { user: any }) {
+export default function Navbar({ user, isAdmin }: { user: any; isAdmin?: boolean }) {
   const [isPending, startTransition] = useTransition();
   const [isScrolled, setIsScrolled] = useState(false);
   const { scrollY } = useScroll();
@@ -103,9 +103,11 @@ export default function Navbar({ user }: { user: any }) {
                       <p className="text-xs text-navy-400">Signed in as</p>
                       <p className="text-sm font-semibold text-warm-50 truncate">{user?.email || "Admin"}</p>
                     </div>
-                    <Link href="/admin" className="block px-3 py-2 text-sm hover:bg-navy-900 rounded-lg transition-colors min-h-[40px] flex items-center" data-interactive>
-                      Dashboard
-                    </Link>
+                    {isAdmin && (
+                      <Link href="/admin" className="block px-3 py-2 text-sm hover:bg-navy-900 rounded-lg transition-colors min-h-[40px] flex items-center" data-interactive>
+                        Dashboard
+                      </Link>
+                    )}
                     <button 
                       onClick={() => startTransition(() => logoutUser())}
                       disabled={isPending}

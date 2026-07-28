@@ -47,15 +47,20 @@ export async function authenticateWithTurnstile(formData: FormData) {
 
   // 2. Authenticate with Neon
   let result;
-  if (isSignUp) {
-    const name = email.split('@')[0] || 'User'
-    result = await auth.signUp.email({ name, email, password })
-  } else {
-    result = await auth.signIn.email({ email, password })
-  }
+  try {
+    if (isSignUp) {
+      const name = email.split('@')[0] || 'User'
+      result = await auth.signUp.email({ name, email, password })
+    } else {
+      result = await auth.signIn.email({ email, password })
+    }
 
-  if (result?.error) {
-    return { error: result.error.message || "Authentication failed. Please check your credentials." }
+    if (result?.error) {
+      return { error: result.error.message || "Authentication failed. Please check your credentials." }
+    }
+  } catch (err: any) {
+    console.error("Auth action error:", err);
+    return { error: "An unexpected authentication error occurred." }
   }
 
   // Clear rate limit on successful authentication
@@ -97,6 +102,10 @@ export async function verifySignupOtp(formData: FormData) {
 }
 
 export async function logoutUser() {
-  await auth.signOut()
+  try {
+    await auth.signOut()
+  } catch (err) {
+    console.error("Logout error:", err);
+  }
   redirect('/')
 }

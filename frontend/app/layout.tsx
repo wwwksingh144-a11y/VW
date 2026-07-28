@@ -99,7 +99,7 @@ export default async function RootLayout({
       user = sessionRes.data.user;
       
       const adminEmails = process.env.ADMIN_EMAILS ? process.env.ADMIN_EMAILS.split(',').map(e => e.trim().toLowerCase()) : [];
-      const superAdmin = process.env.SUPER_ADMIN_EMAIL?.trim().toLowerCase();
+      const superAdmin = process.env.SUPER_ADMIN_EMAIL?.trim()?.toLowerCase();
       
       if (
         (user.email && adminEmails.includes(user.email.toLowerCase())) || 

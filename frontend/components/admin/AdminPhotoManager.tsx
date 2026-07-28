@@ -6,8 +6,10 @@
 // VISUAL_DENSITY: 5
 
 import React, { useState, useEffect, useRef } from "react";
-import { Upload, Image as ImageIcon, Trash2, CheckCircle2, AlertCircle, Loader2, RefreshCw, Terminal, Activity, ChevronRight, Clock, Maximize2 } from "lucide-react";
+import { Upload, Image as ImageIcon, Trash2, Edit2, CheckCircle2, AlertCircle, Loader2, RefreshCw, Terminal, Activity, ChevronRight, Clock, Maximize2 } from "lucide-react";
 import { upload } from "@vercel/blob/client";
+import { EditMediaModal } from "./EditMediaModal";
+import { softDeleteMedia, getAdminMedia } from "@/app/actions/mediaActions";
 
 interface LogEntry {
   timestamp: string;
@@ -51,17 +53,18 @@ export const AdminPhotoManager: React.FC<AdminPhotoManagerProps> = ({ isModal = 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const consoleEndRef = useRef<HTMLDivElement>(null);
 
+  const [editPhoto, setEditPhoto] = useState<PhotoRecord | null>(null);
+
   // Fetch all photos from backend API
   const fetchPhotos = async () => {
     try {
-      const res = await fetch(`${BACKEND_URL}/api/photos`);
-      if (res.ok) {
-        const data: PhotoRecord[] = await res.json();
-        setPhotos(data);
+      const res = await getAdminMedia('photos');
+      if (res.success) {
+        setPhotos(res.data);
         
         // Auto-select most recently active or first photo if none selected
-        if (!selectedPhotoId && data.length > 0) {
-          setSelectedPhotoId(data[0].id);
+        if (!selectedPhotoId && res.data.length > 0) {
+          setSelectedPhotoId(res.data[0].id);
         }
       }
     } catch (err) {
@@ -153,16 +156,16 @@ export const AdminPhotoManager: React.FC<AdminPhotoManagerProps> = ({ isModal = 
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this photo asset from cloud storage and database?")) return;
+    if (!confirm("Are you sure you want to soft-delete this photo?")) return;
     try {
-      const res = await fetch(`${BACKEND_URL}/api/photos/${id}`, {
-        method: "DELETE",
-      });
-      if (res.ok) {
-        setPhotos((prev) => prev.filter((p) => p.id !== id));
+      const res = await softDeleteMedia('photos', id);
+      if (res.success) {
+        fetchPhotos();
         if (selectedPhotoId === id) {
           setSelectedPhotoId(photos[0]?.id || null);
         }
+      } else {
+        alert(res.error);
       }
     } catch (err) {
       console.error("Failed to delete photo:", err);
@@ -378,7 +381,7 @@ export const AdminPhotoManager: React.FC<AdminPhotoManagerProps> = ({ isModal = 
                         <div className="flex items-center justify-between gap-2">
                           <div className="flex items-center gap-2 truncate">
                             <span className="font-bold text-navy-950 text-sm truncate" title={p.originalFileName}>
-                              {p.originalFileName}
+                              {p.heading || p.originalFileName}
                             </span>
                           </div>
 
@@ -448,6 +451,16 @@ export const AdminPhotoManager: React.FC<AdminPhotoManagerProps> = ({ isModal = 
                               ⚡ USE
                             </button>
                           )}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setEditPhoto(p);
+                            }}
+                            className="p-1.5 text-navy-500 hover:text-navy-900 bg-navy-100 hover:bg-navy-200 rounded-lg transition-all active:scale-95"
+                            title="Edit Details"
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </button>
                           <span className="text-bronze-600 font-bold group-hover:underline flex items-center gap-0.5 text-[11px]">
                             <span>Logs</span>
                             <ChevronRight className="w-3 h-3" />
@@ -616,6 +629,14 @@ export const AdminPhotoManager: React.FC<AdminPhotoManagerProps> = ({ isModal = 
         )}
 
       </div>
+      {editPhoto && (
+        <EditMediaModal 
+          media={editPhoto}
+          type="photos"
+          onClose={() => setEditPhoto(null)}
+          onRefresh={fetchPhotos}
+        />
+      )}
     </div>
   );
 };

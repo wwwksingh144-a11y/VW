@@ -8,6 +8,12 @@
     "start": "next start",
     "lint": "eslint"
   },
+  "overrides": {
+    "better-auth": "^1.6.25",
+    "esbuild": "^0.24.2",
+    "postcss": "^8.5.1",
+    "sharp": "^0.33.5"
+  },
   "dependencies": {
     "@marsidev/react-turnstile": "^1.5.3",
     "@neondatabase/auth": "^0.4.2-beta",
@@ -21,6 +27,7 @@
     "drizzle-orm": "^0.45.2",
     "framer-motion": "^12.42.2",
     "ioredis": "^5.11.1",
+    "jose": "^6.2.4",
     "lenis": "^1.3.25",
     "lucide-react": "^1.26.0",
     "next": "16.2.11",

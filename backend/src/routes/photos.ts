@@ -9,6 +9,7 @@ import { StorageService } from '../storage';
 import { enqueuePhotoJob } from '../queue';
 import { config } from '../config';
 import { PipelineLogger } from '../logger';
+import * as FileType from 'file-type';
 
 const router = Router();
 
@@ -32,11 +33,17 @@ const upload = multer({
  * POST /api/photos
  * Upload original photo to Vercel Blob, create DB record, and enqueue processing job.
  */
-router.post('/', upload.single('photo'), async (req: Request, res: Response) => {
+router.post('/', upload.single('photo'), async (req: Request, res: Response, next) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No image file provided' });
     }
+
+    const fileTypeResult = await FileType.fromBuffer(req.file.buffer);
+    if (!fileTypeResult || !config.photo.allowedMimetypes.includes(fileTypeResult.mime)) {
+      return res.status(400).json({ error: 'Invalid file content detected.' });
+    }
+
 
     const userId = (req.body.userId as string) || 'admin';
     const photoId = uuidv4();
@@ -105,9 +112,7 @@ router.post('/', upload.single('photo'), async (req: Request, res: Response) => 
     });
   } catch (error: any) {
     console.error('Photo upload endpoint error:', error);
-    res.status(500).json({
-      error: error.message || 'Failed to upload photo',
-    });
+    next(error);
   }
 });
 
@@ -115,7 +120,7 @@ router.post('/', upload.single('photo'), async (req: Request, res: Response) => 
  * GET /api/photos
  * List all uploaded photos with logs
  */
-router.get('/', async (req: Request, res: Response) => {
+router.get('/', async (req: Request, res: Response, next) => {
   try {
     const photoList = await db
       .select()
@@ -132,7 +137,7 @@ router.get('/', async (req: Request, res: Response) => {
     res.json(photosWithLogs);
   } catch (error) {
     console.error('Failed to fetch photos:', error);
-    res.status(500).json({ error: 'Failed to fetch photos' });
+    next(error);
   }
 });
 
@@ -140,7 +145,7 @@ router.get('/', async (req: Request, res: Response) => {
  * GET /api/photos/:id/status
  * Lightweight polling endpoint for photo status
  */
-router.get('/:id/status', async (req: Request, res: Response) => {
+router.get('/:id/status', async (req: Request, res: Response, next) => {
   try {
     const photoId = String(req.params.id);
     const result = await db
@@ -162,7 +167,7 @@ router.get('/:id/status', async (req: Request, res: Response) => {
     res.json(result[0]);
   } catch (error) {
     console.error('Failed to fetch photo status:', error);
-    res.status(500).json({ error: 'Failed to fetch photo status' });
+    next(error);
   }
 });
 
@@ -170,7 +175,7 @@ router.get('/:id/status', async (req: Request, res: Response) => {
  * GET /api/photos/:id
  * Full metadata for a photo (including WebP URL and thumbnail URL)
  */
-router.get('/:id', async (req: Request, res: Response) => {
+router.get('/:id', async (req: Request, res: Response, next) => {
   try {
     const photoId = String(req.params.id);
     const result = await db
@@ -186,7 +191,7 @@ router.get('/:id', async (req: Request, res: Response) => {
     res.json({ ...result[0], logs });
   } catch (error) {
     console.error('Failed to fetch photo metadata:', error);
-    res.status(500).json({ error: 'Failed to fetch photo details' });
+    next(error);
   }
 });
 
@@ -194,7 +199,7 @@ router.get('/:id', async (req: Request, res: Response) => {
  * DELETE /api/photos/:id
  * Delete photo metadata and associated Vercel Blob assets
  */
-router.delete('/:id', async (req: Request, res: Response) => {
+router.delete('/:id', async (req: Request, res: Response, next) => {
   try {
     const photoId = String(req.params.id);
     const result = await db
@@ -222,7 +227,7 @@ router.delete('/:id', async (req: Request, res: Response) => {
     res.json({ success: true, message: 'Photo deleted successfully' });
   } catch (error) {
     console.error('Failed to delete photo:', error);
-    res.status(500).json({ error: 'Failed to delete photo' });
+    next(error);
   }
 });
 

@@ -44,7 +44,7 @@ export async function PUT(
       .where(eq(insights.id, insightId))
       .returning();
 
-    logAdminAction(
+    await logAdminAction(
       "insight.update",
       user.id ?? "unknown",
       user.email ?? "unknown",
@@ -84,7 +84,7 @@ export async function DELETE(
       .delete(insights)
       .where(eq(insights.id, insightId));
 
-    logAdminAction(
+    await logAdminAction(
       "insight.delete",
       user.id ?? "unknown",
       user.email ?? "unknown",

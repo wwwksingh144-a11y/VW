@@ -1,41 +1,30 @@
-/**
- * Structured audit logger for admin operations.
- *
- * Writes JSON-formatted log entries to the server console.
- * In production, these can be piped to a log aggregator
- * (e.g. Vercel Log Drains, Datadog, Sentry).
- */
+import { db } from "@/lib/db";
+import { adminAuditLogs } from "@/lib/db/schema";
+import { headers } from "next/headers";
 
-export interface AuditLogEntry {
-  timestamp: string;
-  action: string;
-  userId: string;
-  userEmail: string;
-  details?: Record<string, unknown>;
-}
-
-/**
- * Log an admin action with structured metadata.
- *
- * @param action    - The operation performed (e.g. "project.create", "insight.delete")
- * @param userId    - The authenticated user's ID
- * @param userEmail - The authenticated user's email
- * @param details   - Optional additional context (e.g. project ID, slug)
- */
-export function logAdminAction(
+export async function logAdminAction(
   action: string,
   userId: string,
   userEmail: string,
   details?: Record<string, unknown>
 ) {
-  const entry: AuditLogEntry = {
-    timestamp: new Date().toISOString(),
-    action,
-    userId,
-    userEmail,
-    ...(details ? { details } : {}),
-  };
+  try {
+    const headersList = await headers();
+    const ipAddress = headersList.get("x-forwarded-for") || headersList.get("x-real-ip") || "unknown";
+    const userAgent = headersList.get("user-agent") || "unknown";
 
-  // Structured JSON log — easily parseable by log aggregators
-  console.log(`[AUDIT] ${JSON.stringify(entry)}`);
+    await db.insert(adminAuditLogs).values({
+      adminName: userId,
+      adminEmail: userEmail,
+      action: action,
+      resourceType: details?.resourceType as string || "insight",
+      resourceId: details?.resourceId as string || details?.insightId?.toString() || "",
+      newValue: details,
+      ipAddress: ipAddress,
+      userAgent: userAgent,
+      status: "success"
+    });
+  } catch (error) {
+    console.error("[AUDIT LOG ERROR]", error);
+  }
 }

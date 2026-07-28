@@ -6,9 +6,11 @@
 // VISUAL_DENSITY: 5
 
 import React, { useState, useEffect, useRef } from "react";
-import { Upload, Film, Trash2, CheckCircle2, AlertCircle, Loader2, RefreshCw, Terminal, Activity, ChevronRight, Clock, ShieldAlert } from "lucide-react";
+import { Upload, Film, Trash2, Edit2, CheckCircle2, AlertCircle, Loader2, RefreshCw, Terminal, Activity, ChevronRight, Clock, ShieldAlert } from "lucide-react";
 import { upload } from "@vercel/blob/client";
 import { LazyVideoPlayer } from "../video/LazyVideoPlayer";
+import { EditMediaModal } from "./EditMediaModal";
+import { softDeleteMedia, getAdminMedia } from "@/app/actions/mediaActions";
 
 interface LogEntry {
   timestamp: string;
@@ -51,17 +53,18 @@ export const AdminVideoManager: React.FC<AdminVideoManagerProps> = ({ isModal = 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const consoleEndRef = useRef<HTMLDivElement>(null);
 
+  const [editVideo, setEditVideo] = useState<VideoRecord | null>(null);
+
   // Fetch all videos from backend API
   const fetchVideos = async () => {
     try {
-      const res = await fetch(`${BACKEND_URL}/api/videos`);
-      if (res.ok) {
-        const data: VideoRecord[] = await res.json();
-        setVideos(data);
+      const res = await getAdminMedia('videos');
+      if (res.success) {
+        setVideos(res.data);
         
         // Auto-select most recently active or first video if none selected
-        if (!selectedVideoId && data.length > 0) {
-          setSelectedVideoId(data[0].id);
+        if (!selectedVideoId && res.data.length > 0) {
+          setSelectedVideoId(res.data[0].id);
         }
       }
     } catch (err) {
@@ -152,16 +155,16 @@ export const AdminVideoManager: React.FC<AdminVideoManagerProps> = ({ isModal = 
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this video asset from cloud storage and database?")) return;
+    if (!confirm("Are you sure you want to soft-delete this video?")) return;
     try {
-      const res = await fetch(`${BACKEND_URL}/api/videos/${id}`, {
-        method: "DELETE",
-      });
-      if (res.ok) {
-        setVideos((prev) => prev.filter((v) => v.id !== id));
+      const res = await softDeleteMedia('videos', id);
+      if (res.success) {
+        fetchVideos();
         if (selectedVideoId === id) {
           setSelectedVideoId(videos[0]?.id || null);
         }
+      } else {
+        alert(res.error);
       }
     } catch (err) {
       console.error("Failed to delete video:", err);
@@ -374,7 +377,7 @@ export const AdminVideoManager: React.FC<AdminVideoManagerProps> = ({ isModal = 
                         <div className="flex items-center justify-between gap-3">
                           <div className="flex items-center gap-2">
                             <span className="font-bold text-navy-950 text-base truncate max-w-[280px]" title={v.originalFileName}>
-                              {v.originalFileName}
+                              {v.heading || v.originalFileName}
                             </span>
                             {isSelected && (
                               <span className="text-[10px] font-mono font-bold bg-bronze-500 text-warm-50 px-2 py-0.5 rounded-md uppercase tracking-wider">
@@ -437,6 +440,16 @@ export const AdminVideoManager: React.FC<AdminVideoManagerProps> = ({ isModal = 
                               ⚡ USE
                             </button>
                           )}
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setEditVideo(v);
+                            }}
+                            className="p-1.5 text-navy-500 hover:text-navy-900 bg-navy-100 hover:bg-navy-200 rounded-lg transition-all active:scale-95"
+                            title="Edit Details"
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </button>
                           <span className="text-bronze-600 font-bold group-hover:underline flex items-center gap-1">
                             <span>Inspect Telemetry</span>
                             <ChevronRight className="w-3.5 h-3.5" />
@@ -603,6 +616,14 @@ export const AdminVideoManager: React.FC<AdminVideoManagerProps> = ({ isModal = 
         )}   </div>
 
       </div>
+      {editVideo && (
+        <EditMediaModal 
+          media={editVideo}
+          type="videos"
+          onClose={() => setEditVideo(null)}
+          onRefresh={fetchVideos}
+        />
+      )}
     </div>
   );
 };

@@ -3,7 +3,7 @@ import { put } from '@vercel/blob';
 import { v4 as uuidv4 } from 'uuid';
 import { db } from '@/lib/db';
 import { photos } from '@/lib/db/schema';
-import { desc, eq } from 'drizzle-orm';
+import { desc, asc, eq } from 'drizzle-orm';
 import { enqueuePhotoJob } from '@/lib/queue';
 import { PipelineLogger } from '@/lib/logger';
 
@@ -14,7 +14,8 @@ export async function GET() {
     const photoList = await db
       .select()
       .from(photos)
-      .orderBy(desc(photos.createdAt));
+      .where(eq(photos.publishStatus, 'published'))
+      .orderBy(desc(photos.isStarred), asc(photos.displayOrder), desc(photos.createdAt));
 
     const withLogs = await Promise.all(
       photoList.map(async (p) => ({

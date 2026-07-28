@@ -9,6 +9,7 @@ import { StorageService } from '../storage';
 import { enqueueVideoJob } from '../queue';
 import { config } from '../config';
 import { PipelineLogger } from '../logger';
+import * as FileType from 'file-type';
 
 const router = Router();
 
@@ -32,10 +33,15 @@ const upload = multer({
  * POST /api/videos
  * Upload original MP4 video to Vercel Blob, create DB record, and enqueue processing job.
  */
-router.post('/', upload.single('video'), async (req: Request, res: Response) => {
+router.post('/', upload.single('video'), async (req: Request, res: Response, next) => {
   try {
     if (!req.file) {
       return res.status(400).json({ error: 'No video file provided' });
+    }
+
+    const fileTypeResult = await FileType.fromBuffer(req.file.buffer);
+    if (!fileTypeResult || !config.video.allowedMimetypes.includes(fileTypeResult.mime)) {
+      return res.status(400).json({ error: 'Invalid file content detected.' });
     }
 
     const userId = (req.body.userId as string) || 'admin';
@@ -101,9 +107,7 @@ router.post('/', upload.single('video'), async (req: Request, res: Response) => 
     });
   } catch (error: any) {
     console.error('Video upload endpoint error:', error);
-    res.status(500).json({
-      error: error.message || 'Failed to upload video',
-    });
+    next(error);
   }
 });
 
@@ -111,7 +115,7 @@ router.post('/', upload.single('video'), async (req: Request, res: Response) => 
  * GET /api/videos
  * List all uploaded videos
  */
-router.get('/', async (req: Request, res: Response) => {
+router.get('/', async (req: Request, res: Response, next) => {
   try {
     const videoList = await db
       .select()
@@ -128,7 +132,7 @@ router.get('/', async (req: Request, res: Response) => {
     res.json(videosWithLogs);
   } catch (error) {
     console.error('Failed to fetch videos:', error);
-    res.status(500).json({ error: 'Failed to fetch videos' });
+    next(error);
   }
 });
 
@@ -136,7 +140,7 @@ router.get('/', async (req: Request, res: Response) => {
  * GET /api/videos/:id/status
  * Lightweight polling endpoint for video status
  */
-router.get('/:id/status', async (req: Request, res: Response) => {
+router.get('/:id/status', async (req: Request, res: Response, next) => {
   try {
     const videoId = String(req.params.id);
     const result = await db
@@ -157,7 +161,7 @@ router.get('/:id/status', async (req: Request, res: Response) => {
     res.json(result[0]);
   } catch (error) {
     console.error('Failed to fetch video status:', error);
-    res.status(500).json({ error: 'Failed to fetch video status' });
+    next(error);
   }
 });
 
@@ -165,7 +169,7 @@ router.get('/:id/status', async (req: Request, res: Response) => {
  * GET /api/videos/:id
  * Full metadata for a video (including WebM URL, MP4 URL, thumbnail URL)
  */
-router.get('/:id', async (req: Request, res: Response) => {
+router.get('/:id', async (req: Request, res: Response, next) => {
   try {
     const videoId = String(req.params.id);
     const result = await db
@@ -181,7 +185,7 @@ router.get('/:id', async (req: Request, res: Response) => {
     res.json({ ...result[0], logs });
   } catch (error) {
     console.error('Failed to fetch video metadata:', error);
-    res.status(500).json({ error: 'Failed to fetch video details' });
+    next(error);
   }
 });
 
@@ -189,7 +193,7 @@ router.get('/:id', async (req: Request, res: Response) => {
  * DELETE /api/videos/:id
  * Delete video metadata and associated Vercel Blob assets
  */
-router.delete('/:id', async (req: Request, res: Response) => {
+router.delete('/:id', async (req: Request, res: Response, next) => {
   try {
     const videoId = String(req.params.id);
     const result = await db
@@ -218,7 +222,7 @@ router.delete('/:id', async (req: Request, res: Response) => {
     res.json({ success: true, message: 'Video deleted successfully' });
   } catch (error) {
     console.error('Failed to delete video:', error);
-    res.status(500).json({ error: 'Failed to delete video' });
+    next(error);
   }
 });
 

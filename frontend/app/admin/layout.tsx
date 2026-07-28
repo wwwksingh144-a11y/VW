@@ -6,6 +6,7 @@
 import { Link } from "@/components/ui/Link";
 import { Eye, Briefcase, FileText, LogOut, User, Video, ShieldCheck, Activity, Terminal, Image as ImageIcon } from "lucide-react";
 import { requireAdmin } from "@/lib/auth/rbac";
+import { AdminMobileNav } from "@/components/admin/AdminMobileNav";
 
 export const dynamic = "force-dynamic";
 
@@ -128,9 +129,10 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <main className="flex-1 overflow-auto flex flex-col min-w-0">
         
         {/* Top Telemetry Header Bar */}
-        <header className="bg-warm-50/90 backdrop-blur-md border-b border-navy-200/60 px-6 py-4 flex justify-between items-center sticky top-0 z-10 shadow-sm">
+        <header className="bg-warm-50/90 backdrop-blur-md border-b border-navy-200/60 px-4 md:px-6 py-4 flex justify-between items-center sticky top-0 z-10 shadow-sm">
           <div className="flex items-center gap-3">
-            <h1 className="text-base font-bold text-navy-950 md:hidden">Vision Wings Admin</h1>
+            <AdminMobileNav />
+            <h1 className="text-base font-bold text-navy-950 md:hidden">Vision Wings</h1>
             <div className="hidden md:flex items-center gap-2 text-xs font-mono text-navy-500">
               <Terminal className="w-3.5 h-3.5 text-bronze-600" />
               <span>ENV: PRODUCTION</span>

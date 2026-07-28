@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
       })
       .returning();
 
-    logAdminAction(
+    await logAdminAction(
       "insight.create",
       user.id ?? "unknown",
       user.email ?? "unknown",

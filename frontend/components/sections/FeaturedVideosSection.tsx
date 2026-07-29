@@ -15,6 +15,7 @@ import Image from "next/image";
 
 interface FeaturedVideosProps {
   dbVideos?: any[];
+  settings?: Record<string, string>;
 }
 
 const fallbackFeaturedVideos = [
@@ -53,7 +54,7 @@ const fallbackFeaturedVideos = [
   },
 ];
 
-export default function FeaturedVideosSection({ dbVideos = [] }: FeaturedVideosProps) {
+export default function FeaturedVideosSection({ dbVideos = [], settings = {} }: FeaturedVideosProps) {
   // If we have live DB videos, map up to 3 of them into our featured gallery structure
   const displayVideos = (dbVideos && dbVideos.length > 0)
     ? dbVideos.slice(0, 3).map((v, idx) => ({
@@ -96,16 +97,16 @@ export default function FeaturedVideosSection({ dbVideos = [] }: FeaturedVideosP
             </div>
             
             <h2 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold font-display text-warm-50 tracking-tight leading-[1.05]">
-              Brand Stories in <br />
+              {settings.featured_videos_title_line1 || "Brand Stories in"} <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-bronze-400 via-amber-200 to-warm-50">
-                High-Definition Motion.
+                {settings.featured_videos_title_line2 || "High-Definition Motion."}
               </span>
             </h2>
           </RevealOnScroll>
 
           <RevealOnScroll delay={0.1} className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4 w-full lg:w-auto">
             <p className="text-body-sm text-navy-300 max-w-xs leading-relaxed hidden xl:block mr-4">
-              We give wings to your vision through 4K commercial cinematography, high-converting launch films, and viral performance ads.
+              {settings.featured_videos_description || "We give wings to your vision through 4K commercial cinematography, high-converting launch films, and viral performance ads."}
             </p>
             
             {/* Clicking opens /videos directly per user request */}

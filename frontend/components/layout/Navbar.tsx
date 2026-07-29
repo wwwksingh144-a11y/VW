@@ -103,11 +103,7 @@ export default function Navbar({ user, isAdmin }: { user: any; isAdmin?: boolean
                       <p className="text-xs text-navy-400">Signed in as</p>
                       <p className="text-sm font-semibold text-warm-50 truncate">{user?.email || "Admin"}</p>
                     </div>
-                    {isAdmin && (
-                      <Link href="/admin" className="block px-3 py-2 text-sm hover:bg-navy-900 rounded-lg transition-colors min-h-[40px] flex items-center" data-interactive>
-                        Dashboard
-                      </Link>
-                    )}
+
                     <button 
                       onClick={() => startTransition(() => logoutUser())}
                       disabled={isPending}

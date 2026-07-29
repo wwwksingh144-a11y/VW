@@ -33,6 +33,24 @@ export async function logAdminAction(data: {
   }
 }
 
+router.get('/is-admin/:email', async (req, res) => {
+  try {
+    const email = req.params.email;
+    if (!email) return res.json({ isAdmin: false });
+    if (email === process.env.SUPER_ADMIN_EMAIL) {
+      return res.json({ isAdmin: true });
+    }
+    const [admin] = await db.select().from(adminRoles).where(eq(adminRoles.email, email));
+    if (admin) {
+      return res.json({ isAdmin: true });
+    }
+    return res.json({ isAdmin: false });
+  } catch (error) {
+    console.error('Error checking is-admin:', error);
+    res.json({ isAdmin: false });
+  }
+});
+
 router.post('/auth', async (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {

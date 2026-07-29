@@ -35,6 +35,24 @@ export async function requireAdmin(requiredRoles?: string[]): Promise<AdminUser>
     const user = sessionRes.data.user;
     const userEmail = (user.email ?? '').toLowerCase();
 
+    // Check if the user is registered as admin
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://vwapi.onrender.com';
+    let isRegisteredAdmin = false;
+    try {
+      const res = await fetch(`${backendUrl}/api/admin/is-admin/${encodeURIComponent(userEmail)}`, { cache: 'no-store' });
+      if (res.ok) {
+        const data = await res.json();
+        isRegisteredAdmin = data.isAdmin === true;
+      }
+    } catch (e) {
+      console.error('Failed to check admin status', e);
+    }
+
+    if (!isRegisteredAdmin) {
+      // If non-admin user types /admin, throw back to home page
+      redirect('/');
+    }
+
     // Secondary Admin Session check
     const cookieStore = await cookies();
     const adminToken = cookieStore.get('admin_session')?.value;

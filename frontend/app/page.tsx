@@ -7,17 +7,20 @@ import FeaturedVideosSection from "@/components/sections/FeaturedVideosSection";
 import Insights from "@/components/sections/Insights";
 import Contact from "@/components/sections/Contact";
 import { getCompletedVideos } from "@/app/actions/videos";
+import { getSettings } from "@/app/actions/settings";
 
 export const revalidate = 3600;
 
 async function FeaturedVideosLoader() {
   let dbVideos: any[] = [];
+  let settings: any = {};
   try {
     dbVideos = await getCompletedVideos();
+    settings = await getSettings();
   } catch (err) {
-    console.error("Failed to fetch DB videos for homepage:", err);
+    console.error("Failed to fetch data for homepage:", err);
   }
-  return <FeaturedVideosSection dbVideos={dbVideos} />;
+  return <FeaturedVideosSection dbVideos={dbVideos} settings={settings} />;
 }
 
 export default function Home() {
@@ -27,7 +30,7 @@ export default function Home() {
       <AboutVision />
       <Services />
       <Work />
-      <Suspense fallback={<FeaturedVideosSection dbVideos={[]} />}>
+      <Suspense fallback={<FeaturedVideosSection dbVideos={[]} settings={{}} />}>
         <FeaturedVideosLoader />
       </Suspense>
       <Insights />

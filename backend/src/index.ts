@@ -7,6 +7,7 @@ import { eq } from 'drizzle-orm';
 import videoRoutes from './routes/videos';
 import photoRoutes from './routes/photos';
 import adminRoutes from './routes/admin';
+import settingsRoutes from './routes/settings';
 import './worker';
 import './photoWorker';
 import { authRateLimitMiddleware, publicRateLimitMiddleware, userActionRateLimitMiddleware } from './middleware/rateLimiter';
@@ -35,6 +36,9 @@ app.use('/api/photos', userActionRateLimitMiddleware, photoRoutes);
 
 // Admin APIs (Auth, Logs, Dual-OTP Promotion)
 app.use('/api/admin', adminRoutes);
+
+// Settings API
+app.use('/api/settings', settingsRoutes);
 
 // Health check
 app.get('/health', publicRateLimitMiddleware, (req, res) => {

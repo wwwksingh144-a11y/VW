@@ -143,3 +143,11 @@ export const adminOtps = pgTable("admin_otps", {
   status: varchar("status", { length: 50 }).default("pending"), // pending, verified, expired
   createdAt: timestamp("created_at").defaultNow(),
 });
+
+// Site Settings
+export const siteSettings = pgTable("site_settings", {
+  id: serial("id").primaryKey(),
+  key: varchar("key", { length: 255 }).notNull().unique(),
+  value: text("value").notNull(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});

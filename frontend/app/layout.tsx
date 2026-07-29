@@ -96,7 +96,12 @@ export default async function RootLayout({
   try {
     const sessionRes = await auth.getSession();
     if (sessionRes?.data?.user) {
-      user = sessionRes.data.user;
+      const u = sessionRes.data.user;
+      user = {
+        ...u,
+        createdAt: u.createdAt instanceof Date ? u.createdAt.toISOString() : u.createdAt,
+        updatedAt: u.updatedAt instanceof Date ? u.updatedAt.toISOString() : u.updatedAt,
+      };
       
       const adminEmails = process.env.ADMIN_EMAILS ? process.env.ADMIN_EMAILS.split(',').map(e => e.trim().toLowerCase()) : [];
       const superAdmin = process.env.SUPER_ADMIN_EMAIL?.trim()?.toLowerCase();

@@ -9,10 +9,16 @@ import { eq, desc } from "drizzle-orm";
 
 export async function getProjects() {
   try {
-    return await db
+    const results = await db
       .select()
       .from(projects)
       .orderBy(desc(projects.createdAt));
+
+    return results.map(p => ({
+      ...p,
+      createdAt: p.createdAt?.toISOString() || null,
+      updatedAt: p.updatedAt?.toISOString() || null
+    }));
   } catch (err) {
     console.error("Failed to fetch projects from Neon DB:", err);
     return [];
@@ -26,7 +32,13 @@ export async function getProjectBySlug(slug: string) {
       .from(projects)
       .where(eq(projects.slug, slug))
       .limit(1);
-    return list[0] || null;
+    const p = list[0];
+    if (!p) return null;
+    return {
+      ...p,
+      createdAt: p.createdAt?.toISOString() || null,
+      updatedAt: p.updatedAt?.toISOString() || null
+    };
   } catch (err) {
     console.error(`Failed to fetch project by slug (${slug}):`, err);
     return null;

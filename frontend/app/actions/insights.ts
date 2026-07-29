@@ -9,10 +9,17 @@ import { eq, desc } from "drizzle-orm";
 
 export async function getInsights() {
   try {
-    return await db
+    const results = await db
       .select()
       .from(insights)
       .orderBy(desc(insights.createdAt));
+
+    return results.map(i => ({
+      ...i,
+      createdAt: i.createdAt?.toISOString() || null,
+      updatedAt: i.updatedAt?.toISOString() || null,
+      publishedAt: i.publishedAt?.toISOString() || null
+    }));
   } catch (err) {
     console.error("Failed to fetch insights from Neon DB:", err);
     return [];
@@ -26,7 +33,14 @@ export async function getInsightBySlug(slug: string) {
       .from(insights)
       .where(eq(insights.slug, slug))
       .limit(1);
-    return list[0] || null;
+    const i = list[0];
+    if (!i) return null;
+    return {
+      ...i,
+      createdAt: i.createdAt?.toISOString() || null,
+      updatedAt: i.updatedAt?.toISOString() || null,
+      publishedAt: i.publishedAt?.toISOString() || null
+    };
   } catch (err) {
     console.error(`Failed to fetch insight by slug (${slug}):`, err);
     return null;

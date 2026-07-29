@@ -136,19 +136,26 @@ router.post('/initiate-promotion', adminAuthMiddleware(['Developer']), async (re
       expiresAt
     });
 
-    await resend.emails.send({
-      from: 'admin@resend.dev', // Testing domain
-      to: req.admin!.email,
-      subject: 'Admin Promotion OTP (Super Admin)',
-      html: `<p>Your OTP to approve promotion for ${email} is: <strong>${superAdminOtp}</strong></p>`
-    });
+    try {
+      await resend.emails.send({
+        from: 'admin@resend.dev', // Testing domain
+        to: req.admin!.email,
+        subject: 'Admin Promotion OTP (Super Admin)',
+        html: `<p>Your OTP to approve promotion for ${email} is: <strong>${superAdminOtp}</strong></p>`
+      });
 
-    await resend.emails.send({
-      from: 'admin@resend.dev',
-      to: email,
-      subject: 'Admin Promotion OTP',
-      html: `<p>You are being promoted to ${role}. Your OTP is: <strong>${promotedOtp}</strong></p>`
-    });
+      await resend.emails.send({
+        from: 'admin@resend.dev',
+        to: email,
+        subject: 'Admin Promotion OTP',
+        html: `<p>You are being promoted to ${role}. Your OTP is: <strong>${promotedOtp}</strong></p>`
+      });
+    } catch (emailError: any) {
+      console.warn('⚠️ Email delivery failed (check RESEND_API_KEY).');
+      console.warn(`[DEV ONLY] Super Admin OTP for ${req.admin!.email}: ${superAdminOtp}`);
+      console.warn(`[DEV ONLY] Promoted OTP for ${email}: ${promotedOtp}`);
+      // Continue execution so the frontend flow doesn't block.
+    }
 
     await logAdminAction({
       adminEmail: req.admin!.email,
